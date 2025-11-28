@@ -1,0 +1,1 @@
+The "world day for disabled" is officially known as the International Day of Persons with Disabilities (IDPwD), observed annually on December 3rd. It is a United Nations-observed day to promote community awareness, understanding, and acceptance of people with disabilities and to support their rights, well-being, and full participation in society
