@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz – Παγκόσμια Ημέρα Ατόμων με Αναπηρία</title>
+  <style>
+    :root {
+      font-size: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Θέματα ------------------------------------------------------ */
+
+    body.light-theme {
+      background-color: #e0f4f5; /* απαλό teal */
+      color: #103034;
+    }
+
+    body.dark-theme {
+      background-color: #00434a; /* λίγο πιο ανοιχτό deep teal */
+      color: #e0f7fa;
+    }
+
+    .app-wrapper {
+      max-width: 960px;
+      margin: 1.5rem auto;
+      padding: 1.5rem 1.25rem 2rem;
+      border-radius: 1.25rem;
+      box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    body.light-theme .app-wrapper {
+      background: #f8feff;              /* πολύ ανοιχτό teal */
+      border: 1px solid #7ac5c8;        /* teal περίγραμμα */
+    }
+
+    body.dark-theme .app-wrapper {
+      background: rgba(0, 90, 99, 0.95); /* πιο ανοιχτή deep teal κάρτα */
+      border: 1px solid rgba(224, 247, 250, 0.25);
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .header-subtitle {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-top: 0.25rem;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.9rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    body.light-theme .badge {
+      background: rgba(0, 131, 143, 0.12);
+      border: 1px solid rgba(0, 131, 143, 0.4);
+      color: #00474f;
+    }
+
+    body.dark-theme .badge {
+      background: rgba(0, 172, 193, 0.3);
+      border: 1px solid rgba(224, 247, 250, 0.5);
+      color: #e0f7fa;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      white-space: nowrap;
+    }
+
+    body.light-theme .theme-toggle {
+      background: #ffffff;
+      border-color: #7ac5c8;
+      color: #104047;
+    }
+
+    body.dark-theme .theme-toggle {
+      background: rgba(0, 96, 104, 0.9);
+      border-color: rgba(224, 247, 250, 0.4);
+      color: #e0f7fa;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid #ffb300;
+      outline-offset: 2px;
+    }
+
+    /* Tabs ------------------------------------------------------ */
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin: 0.5rem 0 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    body.light-theme .tab-button {
+      border-color: #7ac5c8;
+      color: #104047;
+      background: #d3f0f2;        /* απαλό teal */
+    }
+
+    body.dark-theme .tab-button {
+      border-color: rgba(224, 247, 250, 0.35);
+      color: #e0f7fa;
+      background: rgba(0, 96, 104, 0.7);
+    }
+
+    .tab-button.active {
+      font-weight: 600;
+    }
+
+    body.light-theme .tab-button.active {
+      background: #00838f;        /* έντονο teal για ενεργό tab */
+      border-color: #006a73;
+      color: #ffffff;
+    }
+
+    body.dark-theme .tab-button.active {
+      background: #00acc1;
+      border-color: #26c6da;
+      color: #00363a;
+    }
+
+    .view {
+      margin-top: 0.5rem;
+    }
+
+    .view[hidden] {
+      display: none;
+    }
+
+    /* Quiz intro ------------------------------------------------ */
+
+    .quiz-intro {
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .quiz-intro p {
+      margin: 0.25rem 0;
+    }
+
+    /* Language notes (collapsible) ------------------------------ */
+
+    .language-notes {
+      margin-bottom: 1.1rem;
+      padding: 0.8rem 0.7rem;
+      border-radius: 0.75rem;
+      font-size: 0.92rem;
+    }
+
+    body.light-theme .language-notes {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 131, 143, 0.25);
+    }
+
+    body.dark-theme .language-notes {
+      background: rgba(0, 40, 45, 0.9);
+      border: 1px solid rgba(224, 247, 250, 0.25);
+    }
+
+    .language-notes summary {
+      cursor: pointer;
+      font-weight: 600;
+      list-style: none;
+    }
+
+    .language-notes summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .language-notes summary::before {
+      content: "➕ ";
+      font-size: 0.8rem;
+    }
+
+    .language-notes[open] summary::before {
+      content: "➖ ";
+    }
+
+    .language-notes ul {
+      margin: 0.4rem 0 0.2rem 1.1rem;
+      padding: 0;
+    }
+
+    .language-notes li {
+      margin-bottom: 0.25rem;
+    }
+
+    .bad-phrase,
+    .good-phrase {
+      font-weight: 700;
+    }
+
+    body.light-theme .bad-phrase {
+      color: #c62828;
+    }
+
+    body.dark-theme .bad-phrase {
+      color: #ff5252;
+    }
+
+    body.light-theme .good-phrase {
+      color: #2e7d32;
+    }
+
+    body.dark-theme .good-phrase {
+      color: #a5d6a7;
+    }
+
+    /* Status bar & question card -------------------------------- */
+
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .question-card {
+      padding: 1rem 0;
+      border-radius: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    body.light-theme .question-card {
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    body.dark-theme .question-card {
+      border-top: 1px solid rgba(224, 247, 250, 0.22);
+      border-bottom: 1px solid rgba(224, 247, 250, 0.22);
+    }
+
+    #questionText {
+      margin: 0 0 0.75rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .option-button {
+      width: 100%;
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition:
+        background-color 0.18s ease,
+        transform 0.08s ease,
+        box-shadow 0.12s ease,
+        border-color 0.18s ease;
+    }
+
+    body.light-theme .option-button {
+      background: #ffffff;
+      border-color: #c2e6e8;
+      color: #103034;
+    }
+
+    body.dark-theme .option-button {
+      background: rgba(224, 247, 250, 0.04);
+      border-color: rgba(224, 247, 250, 0.25);
+      color: #e0f7fa;
+    }
+
+    .option-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+    }
+
+    .option-button:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .option-button:disabled {
+      cursor: default;
+      opacity: 0.96;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .option-button.correct {
+      background-color: #2e7d32;
+      border-color: #1b5e20;
+      color: #ffffff;
+    }
+
+    .option-button.incorrect {
+      background-color: #c62828;
+      border-color: #8e0000;
+      color: #ffffff;
+    }
+
+    .option-button:focus-visible {
+      outline: 3px solid #ffb300;
+      outline-offset: 2px;
+    }
+
+    .feedback {
+      margin-top: 0.75rem;
+      min-height: 3.5rem;
+      font-size: 0.95rem;
+    }
+
+    .control-row {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    /* Buttons --------------------------------------------------- */
+
+    .primary-btn,
+    .secondary-btn {
+      padding: 0.55rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+
+    body.light-theme .primary-btn {
+      background-color: #ff9800;
+      border-color: #ef6c00;
+      color: #ffffff;
+    }
+
+    body.dark-theme .primary-btn {
+      background-color: #ffb300;
+      border-color: #ffb300;
+      color: #00363a;
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    body.light-theme .secondary-btn {
+      background-color: transparent;
+      border-color: #00838f;
+      color: #006064;
+    }
+
+    body.dark-theme .secondary-btn {
+      background-color: transparent;
+      border-color: rgba(224, 247, 250, 0.4);
+      color: #e0f7fa;
+    }
+
+    .primary-btn:focus-visible,
+    .secondary-btn:focus-visible {
+      outline: 3px solid #ffb300;
+      outline-offset: 2px;
+    }
+
+    /* Ideas box ------------------------------------------------- */
+
+    .ideas {
+      margin-top: 1.1rem;
+      padding: 0.8rem 0.7rem;
+      border-radius: 0.75rem;
+      font-size: 0.92rem;
+    }
+
+    body.light-theme .ideas {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 131, 143, 0.25);
+    }
+
+    body.dark-theme .ideas {
+      background: rgba(0, 40, 45, 0.9);
+      border: 1px solid rgba(224, 247, 250, 0.25);
+    }
+
+    .ideas.summary {
+      cursor: pointer;
+      font-weight: 600;
+      list-style: none;
+    }
+
+    .ideas summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .ideas summary::before {
+      content: "➕ ";
+      font-size: 0.8rem;
+    }
+
+    .ideas[open] summary::before {
+      content: "➖ ";
+    }
+
+    .ideas ul {
+      margin: 0.5rem 0 0.25rem 1.1rem;
+      padding: 0;
+    }
+
+    .ideas li {
+      margin-bottom: 0.2rem;
+    }
+
+    /* Worksheet & instructions ---------------------------------- */
+
+    .view-worksheet,
+    .view-instructions {
+      font-size: 0.95rem;
+    }
+
+    /* Το view του φύλλου εργασίας: πάντα λευκό, μαύρο κείμενο */
+    #worksheetView {
+      background: #ffffff;
+      color: #000000;
+      border-radius: 0.75rem;
+      padding-top: 0.25rem;
+    }
+
+    #worksheetView .worksheet-section,
+    #worksheetView .worksheet-section * {
+      color: #000000;
+    }
+
+    .worksheet-header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.75rem;
+    }
+
+    .print-btn {
+      margin-bottom: 0.25rem;
+    }
+
+    .worksheet-section,
+    .instructions-section {
+      margin-bottom: 1rem;
+      padding: 0.75rem 0.75rem;
+      border-radius: 0.75rem;
+    }
+
+    /* Φύλλο εργασίας: πάντα λευκό, ΧΩΡΙΣ περίγραμμα section */
+    .worksheet-section {
+      background: #ffffff;
+      border: none;
+    }
+
+    /* Οδηγίες: ακολουθούν το θέμα */
+    body.light-theme .instructions-section {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 131, 143, 0.25);
+    }
+
+    body.dark-theme .instructions-section {
+      background: rgba(0, 40, 45, 0.9);
+      border: 1px solid rgba(224, 247, 250, 0.25);
+    }
+
+    .worksheet-section h2,
+    .instructions-section h2 {
+      margin-top: 0;
+      font-size: 1rem;
+    }
+
+    .ws-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .ws-label {
+      min-width: 140px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .line-box {
+      flex: 1 1 150px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+      min-height: 1.4rem;
+    }
+
+    .line-box-block {
+      border: 1px solid rgba(0, 0, 0, 0.6);
+      border-radius: 0.35rem;
+      width: 100%;
+      min-height: 3rem;
+      margin: 0.2rem 0 0.5rem;
+    }
+
+    /* Βεβαιωνόμαστε ότι στο worksheet οι γραμμές είναι πάντα σκούρες */
+    #worksheetView .line-box,
+    #worksheetView .line-box-block {
+      border-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .worksheet-question {
+      margin-top: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .worksheet-question p {
+      margin: 0.25rem 0;
+    }
+
+    .ws-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+    }
+
+    .ws-table th,
+    .ws-table td {
+      border: 1px solid rgba(0, 0, 0, 0.3);
+      padding: 0.25rem 0.4rem;
+      vertical-align: top;
+    }
+
+    .ws-table th {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .ws-small-note {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 0.25rem;
+      color: #333333;
+    }
+
+    .page-footer {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 1.3rem;
+      }
+      .quiz-intro {
+        font-size: 1rem;
+      }
+      #questionText {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Print: τυπώνει μόνο το Φύλλο εργασίας --------------------- */
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      .theme-toggle,
+      .tabs,
+      .quiz-intro,
+      .language-notes,
+      .status-bar,
+      .question-card,
+      .ideas,
+      .view-instructions {
+        display: none !important;
+      }
+
+      .view-worksheet {
+        display: block !important;
+      }
+
+      .worksheet-header {
+        justify-content: flex-start;
+      }
+
+      .print-btn {
+        display: none !important;
+      }
+
+      .app-wrapper {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      #worksheetView {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      /* Clear print για το φύλλο εργασίας, ΧΩΡΙΣ περίγραμμα block */
+      .worksheet-section {
+        background: #ffffff !important;
+        border: none !important;
+      }
+
+      .line-box,
+      .line-box-block,
+      .ws-table th,
+      .ws-table td {
+        border-color: #000000 !important;
+      }
+
+      .page-footer {
+        color: #000000 !important;
+        opacity: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <div class="app-wrapper" role="main">
+    <header>
+      <div class="title-group">
+        <div class="badge">3 Δεκεμβρίου · Παγκόσμια Ημέρα Ατόμων με Αναπηρία</div>
+        <h1>Quiz για την Αναπηρία, την Ισότητα και την Ένταξη</h1>
+        <p class="header-subtitle">
+          Κάνε το quiz, συζήτησε με την τάξη σου και σκέψου πώς μπορούμε να κάνουμε την κοινωνία πιο δίκαιη και προσβάσιμη για όλους.
+        </p>
+      </div>
+      <button id="themeToggle" type="button" class="theme-toggle" aria-label="Εναλλαγή φωτεινού/σκοτεινού φόντου">
+        🌗 Εναλλαγή φόντου
+      </button>
+    </header>
+
+    <nav class="tabs" aria-label="Επιλογή προβολής">
+      <button id="tabQuiz" type="button" class="tab-button active">Quiz</button>
+      <button id="tabWorksheet" type="button" class="tab-button">Φύλλο εργασίας</button>
+      <button id="tabInstructions" type="button" class="tab-button">Οδηγίες</button>
+    </nav>
+
+    <!-- ΠΡΟΒΟΛΗ QUIZ -->
+    <div id="quizView" class="view view-quiz">
+      <section class="quiz-intro" aria-label="Εισαγωγή στο quiz">
+        <p>
+          Η αναπηρία δεν είναι «πρόβλημα του ατόμου», αλλά αποτέλεσμα των εμποδίων που βάζει η κοινωνία:
+          μη προσβάσιμα κτίρια, έλλειψη ενημέρωσης, στερεότυπα και διακρίσεις.
+        </p>
+        <p>
+          Μέσα από αυτό το σύντομο quiz θα δούμε:
+          καθημερινές δυσκολίες που συναντούν τα άτομα με αναπηρία στην Ελλάδα
+          και απλούς τρόπους με τους οποίους μπορούμε όλοι να στηρίξουμε την ισότητα, την προσβασιμότητα και τον σεβασμό.
+        </p>
+      </section>
+
+      <details class="language-notes" aria-label="Πολιτικά ορθή γλώσσα για την αναπηρία">
+        <summary>Πολιτικά ορθή γλώσσα: λέμε / δεν λέμε</summary>
+        <div class="language-content">
+          <p>
+            Η γλώσσα που χρησιμοποιούμε μπορεί να πληγώσει ή να στηρίξει. Μερικά παραδείγματα:
+          </p>
+          <ul>
+            <li>
+              Μη ορθή έκφραση:
+              <span class="bad-phrase">«ανάπηρος»</span>,
+              <span class="bad-phrase">«καημένος»</span>,
+              <span class="bad-phrase">«καθυστέρηση»</span>.
+              Προτιμάμε:
+              <span class="good-phrase">«άτομο με αναπηρία»</span>
+              ή πιο συγκεκριμένα
+              <span class="good-phrase">«άτομο με κινητική/νοητική/αισθητηριακή αναπηρία»</span>.
+            </li>
+            <li>
+              Μη ορθή έκφραση:
+              <span class="bad-phrase">«κανονικός άνθρωπος»</span>.
+              Προτιμάμε:
+              <span class="good-phrase">«άτομο χωρίς αναπηρία»</span>.
+              Κανείς δεν είναι «κανονικός» ή «μη κανονικός»· όλοι είμαστε διαφορετικοί.
+            </li>
+            <li>
+              Μη ορθή φράση:
+              <span class="bad-phrase">«είναι καθηλωμένος σε καροτσάκι»</span>.
+              Προτιμάμε:
+              <span class="good-phrase">«χρησιμοποιεί αναπηρικό αμαξίδιο»</span>.
+              Το αμαξίδιο είναι μέσο ελευθερίας και μετακίνησης, όχι «φυλακή».
+            </li>
+            <li>
+              Μη ορθή έκφραση:
+              <span class="bad-phrase">«αυτιστικό παιδί»</span> ως η μόνη ταυτότητα.
+              Προτιμάμε:
+              <span class="good-phrase">«παιδί στο φάσμα του αυτισμού»</span>
+              ή απλά να χρησιμοποιούμε το όνομα του παιδιού.
+            </li>
+            <li>
+              Θυμόμαστε:
+              κάποιοι ενήλικες μπορεί να προτιμούν να αυτοπροσδιορίζονται ως
+              <span class="good-phrase">«ανάπηροι»</span> ή
+              <span class="good-phrase">«αυτιστικοί»</span>.
+              Σεβόμαστε πάντα πώς ο ίδιος ο άνθρωπος θέλει να μιλά για τον εαυτό του.
+              Στην τάξη όμως χρησιμοποιούμε γενικά εκφράσεις που βάζουν πρώτα το άτομο.
+            </li>
+          </ul>
+        </div>
+      </details>
+
+      <section class="status-bar" aria-label="Κατάσταση quiz">
+        <span id="questionCounter">Ερώτηση 1 από 20</span>
+        <span id="scoreDisplay">Σκορ: 0/20</span>
+      </section>
+
+      <section class="question-card" aria-live="polite">
+        <h2 id="questionText">Φόρτωση ερώτησης...</h2>
+        <div id="optionsContainer" class="options"></div>
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+        <div class="control-row">
+          <button id="restartButton" type="button" class="secondary-btn" style="display:none;">
+            🔁 Ξεκίνα ξανά
+          </button>
+          <button id="nextButton" type="button" class="primary-btn" disabled>
+            Επόμενη ερώτηση ▶
+          </button>
+        </div>
+      </section>
+
+      <details class="ideas">
+        <summary>Ιδέες για δράση στο σχολείο μας</summary>
+        <ul>
+          <li>Δημιουργούμε ομάδες «συμμαθητής-υποστηρικτής», ώστε κανείς να μη μένει μόνος στο διάλειμμα.</li>
+          <li>Ελέγχουμε μαζί με τη διεύθυνση πόσο προσβάσιμα είναι τα κτίρια, οι ράμπες, οι τουαλέτες και οι ηλεκτρονικές πλατφόρμες του σχολείου.</li>
+          <li>Οργανώνουμε αφίσες, βίντεο ή μικρές παρουσιάσεις με μηνύματα σεβασμού στη διαφορετικότητα και στις διαφορετικές ικανότητες.</li>
+          <li>Προσέχουμε τη γλώσσα που χρησιμοποιούμε και διορθώνουμε ευγενικά στερεότυπα ή προσβλητικές εκφράσεις, π.χ. προτιμάμε «άτομα με αναπηρία».</li>
+          <li>Συμμετέχουμε ή σχεδιάζουμε δράσεις με συλλόγους ατόμων με αναπηρία, τον δήμο ή άλλους φορείς για τα δικαιώματα και την προσβασιμότητα.</li>
+          <li>Ενημερωνόμαστε για την Εθνική Στρατηγική για τα Δικαιώματα των Ατόμων με Αναπηρία 2024–2030 «Μια Ελλάδα με Όλους για Όλους» και συζητάμε τι σημαίνει αυτό για το σχολείο μας.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- ΠΡΟΒΟΛΗ ΦΥΛΛΟΥ ΕΡΓΑΣΙΑΣ -->
+    <div id="worksheetView" class="view view-worksheet" hidden>
+      <div class="worksheet-header">
+        <button id="printWorksheetBtn" type="button" class="primary-btn print-btn">
+          🖨 Εκτύπωση / Αποθήκευση σε PDF
+        </button>
+      </div>
+
+      <section class="worksheet-section">
+        <h2>Στοιχεία μαθητή/ομάδας</h2>
+        <div class="ws-row">
+          <span class="ws-label">Ονοματεπώνυμο:</span>
+          <div class="line-box"></div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Τμήμα:</span>
+          <div class="line-box"></div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Ομάδα (μέλη):</span>
+          <div class="line-box"></div>
+        </div>
+        <div class="ws-row">
+          <span class="ws-label">Ημερομηνία:</span>
+          <div class="line-box"></div>
+        </div>
+      </section>
+
+      <section class="worksheet-section">
+        <h2>Μέρος Α – Τι έμαθα από το quiz</h2>
+
+        <div class="worksheet-question">
+          <p><strong>1.</strong> Γράψε <strong>τρία πράγματα</strong> που έμαθες από το quiz για την αναπηρία και τα δικαιώματα των ατόμων με αναπηρία:</p>
+          <p>1)</p>
+          <div class="line-box"></div>
+          <p>2)</p>
+          <div class="line-box"></div>
+          <p>3)</p>
+          <div class="line-box"></div>
+        </div>
+
+        <div class="worksheet-question">
+          <p><strong>2.</strong> Ποια <strong>δύο εμπόδια</strong> της καθημερινότητας (στον δρόμο, στο σχολείο, στην πόλη) σου έκαναν μεγαλύτερη εντύπωση; Γιατί;</p>
+          <p><em>Εμπόδιο 1:</em></p>
+          <div class="line-box-block"></div>
+          <p><em>Γιατί;</em></p>
+          <div class="line-box-block"></div>
+
+          <p><em>Εμπόδιο 2:</em></p>
+          <div class="line-box-block"></div>
+          <p><em>Γιατί;</em></p>
+          <div class="line-box-block"></div>
+        </div>
+
+        <div class="worksheet-question">
+          <p><strong>3.</strong> Γράψε <strong>δύο τρόπους</strong> με τους οποίους μπορούμε να στηρίξουμε τα άτομα με αναπηρία στην καθημερινή ζωή:</p>
+          <p>Τρόπος 1:</p>
+          <div class="line-box-block"></div>
+          <p>Τρόπος 2:</p>
+          <div class="line-box-block"></div>
+        </div>
+      </section>
+
+      <section class="worksheet-section">
+        <h2>Μέρος Β – Η γλώσσα που χρησιμοποιούμε</h2>
+
+        <div class="worksheet-question">
+          <p><strong>4.</strong> Συμπλήρωσε τον πίνακα «<strong>Δεν λέμε / Λέμε</strong>». Για κάθε σειρά, συμπλήρωσε μια πιο σωστή φράση.</p>
+
+          <table class="ws-table">
+            <thead>
+              <tr>
+                <th>Δεν λέμε (μη ορθή φράση)</th>
+                <th>Λέμε (πιο σεβαστική φράση)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>«Ο καημένος ο ανάπηρος συμμαθητής μας»</td>
+                <td>
+                  <div class="line-box-block"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>«Είναι καθηλωμένος σε καροτσάκι»</td>
+                <td>
+                  <div class="line-box-block"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>«Κανονικός άνθρωπος»</td>
+                <td>
+                  <div class="line-box-block"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>«Το παιδί με πρόβλημα»</td>
+                <td>
+                  <div class="line-box-block"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>«Αυτός είναι αυτιστικός, άστον»</td>
+                <td>
+                  <div class="line-box-block"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="worksheet-question">
+          <p><strong>5.</strong> Διάλεξε <strong>ΜΙΑ</strong> από τις παραπάνω «μη ορθές» φράσεις.</p>
+          <p>- Γιατί είναι προβληματική;<br>- Πώς μπορεί να πληγώσει κάποιον;</p>
+          <p><em>Φράση:</em></p>
+          <div class="line-box"></div>
+          <p><em>Εξήγησε:</em></p>
+          <div class="line-box-block"></div>
+          <div class="line-box-block"></div>
+        </div>
+      </section>
+
+      <section class="worksheet-section">
+        <h2>Μέρος Γ – Το σχολείο μας πιο προσβάσιμο</h2>
+
+        <div class="worksheet-question">
+          <p><strong>6.</strong> Βρείτε <strong>τρεις χώρους</strong> του σχολείου που θεωρείτε ότι είναι ήδη σχετικά προσβάσιμοι ή φιλικοί για άτομα με αναπηρία (κινητική, αισθητηριακή, μαθησιακή):</p>
+          <p>1) Χώρος / Τι βοηθά:</p>
+          <div class="line-box-block"></div>
+          <p>2) Χώρος / Τι βοηθά:</p>
+          <div class="line-box-block"></div>
+          <p>3) Χώρος / Τι βοηθά:</p>
+          <div class="line-box-block"></div>
+        </div>
+
+        <div class="worksheet-question">
+          <p><strong>7.</strong> Βρείτε <strong>τρία σημεία που χρειάζονται βελτίωση</strong> (ράμπες, σκάλες, τουαλέτες, ήχοι, φωτισμός, ψηφιακό υλικό κ.λπ.):</p>
+          <p>1) Σημείο / Τι δυσκολεύει:</p>
+          <div class="line-box-block"></div>
+          <p>2) Σημείο / Τι δυσκολεύει:</p>
+          <div class="line-box-block"></div>
+          <p>3) Σημείο / Τι δυσκολεύει:</p>
+          <div class="line-box-block"></div>
+        </div>
+
+        <div class="worksheet-question">
+          <p><strong>8.</strong> Προτείνετε <strong>τρεις συγκεκριμένες δράσεις</strong> που θα μπορούσε να κάνει το σχολείο σας (μαθητές, εκπαιδευτικοί, διεύθυνση) για να γίνει πιο συμπεριληπτικό:</p>
+          <p>Δράση 1:</p>
+          <div class="line-box-block"></div>
+          <p>Δράση 2:</p>
+          <div class="line-box-block"></div>
+          <p>Δράση 3:</p>
+          <div class="line-box-block"></div>
+        </div>
+      </section>
+
+      <section class="worksheet-section">
+        <h2>Μέρος Δ – Προσωπική δέσμευση</h2>
+        <div class="worksheet-question">
+          <p><strong>9.</strong> Γράψε μια <strong>προσωπική δέσμευση</strong>:</p>
+          <p>
+            Τι μικρό αλλά σημαντικό πράγμα θα προσπαθήσεις εσύ να κάνεις <strong>από αύριο</strong> για να υπάρχει περισσότερος σεβασμός και συμπερίληψη για τα άτομα με αναπηρία;
+          </p>
+          <p><em>«Από αύριο θα προσπαθήσω να…»</em></p>
+          <div class="line-box-block"></div>
+          <div class="line-box-block"></div>
+        </div>
+        <p class="ws-small-note">
+          (Μπορείς να μοιραστείς, αν θέλεις, τη δέσμευσή σου με την ομάδα ή την τάξη.)
+        </p>
+      </section>
+    </div>
+
+    <!-- ΠΡΟΒΟΛΗ ΟΔΗΓΙΩΝ ΓΙΑ ΕΚΠΑΙΔΕΥΤΙΚΟΥΣ -->
+    <div id="instructionsView" class="view view-instructions" hidden>
+      <section class="instructions-section">
+        <h2>Οδηγίες για εκπαιδευτικούς – 1 διδακτική ώρα</h2>
+        <p><strong>Στόχος:</strong> Ενημέρωση και ευαισθητοποίηση για τα δικαιώματα των ατόμων με αναπηρία, με έμφαση στην προσβασιμότητα και τη γλώσσα που χρησιμοποιούμε στο σχολείο.</p>
+
+        <p><strong>1. Σύντομη εισαγωγή (5’)</strong></p>
+        <ul>
+          <li>Ρωτήστε τους μαθητές τι γνωρίζουν για την 3η Δεκεμβρίου και τη λέξη «αναπηρία».</li>
+          <li>Διευκρινίστε ότι η αναπηρία δεν είναι «πρόβλημα του ατόμου», αλλά αποτέλεσμα εμποδίων που βάζει η κοινωνία (κτίρια, στάσεις, συμπεριφορές).</li>
+        </ul>
+
+        <p><strong>2. Διαδραστικό quiz στην ολομέλεια (15’–20’)</strong></p>
+        <ul>
+          <li>Προβάλετε την εφαρμογή με βιντεοπροβολέα.</li>
+          <li>Κάνετε το quiz όλοι μαζί: διαβάζετε την ερώτηση, ζητάτε πρώτα σχόλια/απόψεις και μετά επιλέγετε την απάντηση.</li>
+          <li>Σε κάθε feedback, σταματήστε για 1–2 λεπτά και συνδέστε το με παραδείγματα από το σχολείο, τη γειτονιά ή τα ΜΜΜ.</li>
+          <li>Δώστε ιδιαίτερη προσοχή στο κομμάτι για την πολιτικά ορθή γλώσσα (collapsible ενότητα «λέμε / δεν λέμε»).</li>
+        </ul>
+
+        <p><strong>3. Φύλλο εργασίας σε ομάδες (15’–20’)</strong></p>
+        <ul>
+          <li>Χωρίστε τους μαθητές σε μικρές ομάδες (3–4 άτομα) και μοιράστε το φύλλο εργασίας (εκτύπωση από το αντίστοιχο tab).</li>
+          <li>Ζητήστε τους να συμπληρώσουν κυρίως τα Μέρη Α, Β και Γ. Το Μέρος Δ (προσωπική δέσμευση) μπορεί να γίνει και ως ατομική εργασία.</li>
+          <li>Κυκλοφορήστε ανάμεσα στις ομάδες, βοηθώντας ιδιαίτερα στη διατύπωση πιο σεβαστικών φράσεων στη δραστηριότητα «Δεν λέμε / Λέμε».</li>
+        </ul>
+
+        <p><strong>4. Κλείσιμο – Μοίρασμα και δέσμευση (5’)</strong></p>
+        <ul>
+          <li>Ζητήστε από 2–3 ομάδες να μοιραστούν μία ιδέα για να γίνει το σχολείο πιο προσβάσιμο.</li>
+          <li>Ρωτήστε αν κάποιος/α θέλει να διαβάσει την προσωπική του/της δέσμευση.</li>
+          <li>Συνδέστε τα συμπεράσματα με τον κανονισμό του σχολείου ή το «συμβόλαιο τάξης» (σεβασμός, μη κοροϊδία, προσοχή στη γλώσσα).</li>
+        </ul>
+
+        <p><strong>5. Ευαισθησία σε μαθητές με αναπηρία στην τάξη</strong></p>
+        <ul>
+          <li>Αν στην τάξη υπάρχει μαθητής/τρια με αναπηρία, ενημερώστε τον/την εκ των προτέρων και ρωτήστε αν νιώθει άνετα με τη δραστηριότητα.</li>
+          <li>Μην ζητήσετε από τον/την ίδιο/α να «εκπροσωπήσει» όλα τα άτομα με αναπηρία ή να μοιραστεί κάτι προσωπικό, αν δεν το επιλέξει μόνος/η του.</li>
+          <li>Τονίστε ότι μιλάτε για δικαιώματα και προσβασιμότητα γενικά, όχι για να σχολιάσετε συγκεκριμένα άτομα.</li>
+        </ul>
+
+        <p class="ws-small-note">
+          Το υλικό μπορεί να επεκταθεί σε 2 διδακτικές ώρες, αν θέλετε περισσότερη συζήτηση για τις προτάσεις βελτίωσης του σχολείου ή δημιουργία αφίσας/συνθήματος για την Παγκόσμια Ημέρα Ατόμων με Αναπηρία.
+        </p>
+      </section>
+    </div>
+
+    <footer class="page-footer">
+      ✨✍️ Δημιουργία: Παναγιώτης Δόμβρος, Εκπαιδευτικός Αγγλικών-Θεατρολόγος, Διευθυντής 1ου Γυμνασίου Πυλαίας ✍️✨
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const quizData = [
+        {
+          question: 'Ποιος είναι ο βασικός στόχος της Παγκόσμιας Ημέρας Ατόμων με Αναπηρία;',
+          options: [
+            'Να λυπηθούμε τα άτομα με αναπηρία.',
+            'Να προωθήσουμε την κατανόηση των θεμάτων αναπηρίας και τα δικαιώματα των ατόμων με αναπηρία.',
+            'Να διοργανώνουμε μόνο φιλανθρωπικές εκδηλώσεις.'
+          ],
+          correct: 1,
+          explanation: 'Η ημέρα αυτή μάς θυμίζει ότι τα άτομα με αναπηρία έχουν τα ίδια δικαιώματα με όλους και χρειάζονται ίσες ευκαιρίες στην εκπαίδευση, την εργασία, την υγεία και την κοινωνική ζωή.'
+        },
+        {
+          question: 'Ποιος είναι ο πιο σύγχρονος και σεβαστικός τρόπος να μιλάμε;',
+          options: [
+            '«Άτομα με ειδικές ανάγκες».',
+            '«Άτομα με αναπηρία».',
+            '«Ανάπηροι» ή «καημένοι».'
+          ],
+          correct: 1,
+          explanation: 'Ο όρος «άτομα με αναπηρία» βάζει πρώτα τον άνθρωπο και όχι τη διάγνωση. Αποφεύγουμε λέξεις που μειώνουν ή λυπούν, όπως «καημένος/η» ή «χαζός/ή».'
+        },
+        {
+          question: 'Ποιο από τα παρακάτω είναι παράδειγμα εμποδίου στην καθημερινότητα ενός ατόμου που χρησιμοποιεί αναπηρικό αμαξίδιο στην Ελλάδα;',
+          options: [
+            'Πολλά πεζοδρόμια χωρίς ράμπες και με παρκαρισμένα αυτοκίνητα πάνω τους.',
+            'Πεζόδρομος με ράμπες, χαμηλά κράσπεδα και καθαρό διάδρομο.',
+            'Ανελκυστήρας που λειτουργεί κανονικά σε κάθε σταθμό.'
+          ],
+          correct: 0,
+          explanation: 'Στενά, κατεστραμμένα ή κατειλημμένα πεζοδρόμια κάνουν τη μετακίνηση με αμαξίδιο ή μπαστούνι πολύ δύσκολη ή επικίνδυνη. Η προσβασιμότητα αφορά τον τρόπο που φτιάχνουμε τους δημόσιους χώρους.'
+        },
+        {
+          question: 'Ένας/Μια συμμαθητής/τρια με βαρηκοΐα στην τάξη...',
+          options: [
+            'Δεν μπορεί να συμμετέχει καθόλου στο μάθημα.',
+            'Μπορεί να συμμετέχει αν προσαρμόσουμε τον τρόπο που μιλάμε και χρησιμοποιήσουμε βοηθητικά μέσα (γραφή στον πίνακα, οπτικό υλικό κτλ.).',
+            'Πρέπει να κάθεται πάντα μόνος/η του για να μην «ενοχλείται».'
+          ],
+          correct: 1,
+          explanation: 'Η σωστή θέση στην τάξη, το να μιλάμε καθαρά, να γράφουμε στον πίνακα ή να χρησιμοποιούμε υπότιτλους και οπτικά βοηθήματα μπορεί να κάνει τεράστια διαφορά στη συμμετοχή.'
+        },
+        {
+          question: 'Τι σημαίνει πραγματικά «προσβάσιμο σχολείο»;',
+          options: [
+            'Αρκεί να υπάρχει μία ράμπα στην κεντρική είσοδο.',
+            'Υπάρχουν ράμπες, ανελκυστήρας όπου χρειάζεται, κατάλληλες τουαλέτες, ξεκάθαρη σήμανση και ψηφιακό υλικό προσβάσιμο για όλους.',
+            'Τα άτομα με αναπηρία απαλλάσσονται από όλες τις εργασίες για να «μην κουράζονται».'
+          ],
+          correct: 1,
+          explanation: 'Ένα προσβάσιμο σχολείο φροντίζει για την πρόσβαση σε όλους τους χώρους (αίθουσες, αυλή, τουαλέτες) και στο μάθημα (σημειώσεις, πλατφόρμες, εξετάσεις), ώστε όλοι να μπορούν να συμμετέχουν ισότιμα.'
+        },
+        {
+          question: 'Όταν βλέπεις έναν συμμαθητή ή μια συμμαθήτρια με αναπηρία να δυσκολεύεται...',
+          options: [
+            'Τον/την κοιτάς επίμονα ή τον/την τραβάς βίντεο για «πλάκα».',
+            'Κάνεις ότι δεν βλέπεις, για να «μην τον/την ενοχλήσεις».',
+            'Προσφέρεις βοήθεια, αλλά πρώτα ρωτάς: «Θες κάπως να βοηθήσω;».'
+          ],
+          correct: 2,
+          explanation: 'Πάντα ρωτάμε πριν βοηθήσουμε και σεβόμαστε την απάντηση. Δεν αγγίζουμε αμαξίδιο, μπαστούνι ή άλλο βοηθητικό μέσο χωρίς άδεια και δεν εκθέτουμε κανέναν σε κοινή θέα ή σε βίντεο.'
+        },
+        {
+          question: 'Τι ισχύει για την «ένταξη» ή «συμπερίληψη» ατόμων με αναπηρία;',
+          options: [
+            'Είναι ευθύνη μόνο των ειδικών εκπαιδευτικών.',
+            'Είναι υπόθεση όλης της σχολικής κοινότητας και της κοινωνίας.',
+            'Αφορά μόνο τα άτομα με κινητική αναπηρία.'
+          ],
+          correct: 1,
+          explanation: 'Η συμπερίληψη αφορά τις στάσεις, τη γλώσσα, τους κανόνες, τις δραστηριότητες όλου του σχολείου: εκπαιδευτικών, μαθητών, γονέων και διοίκησης.'
+        },
+        {
+          question: 'Ποιο παράδειγμα δείχνει ότι σεβόμαστε την ιδιωτικότητα ενός ατόμου με αναπηρία;',
+          options: [
+            'Ρωτάμε δυνατά μπροστά σε όλους «τι έχεις;» και επιμένουμε να μάθουμε λεπτομέρειες.',
+            'Πιάνουμε το μπαστούνι ή το αμαξίδιό του χωρίς να ρωτήσουμε.',
+            'Μιλάμε πρώτα στο ίδιο το άτομο, ρωτάμε αν θέλει να μοιραστεί κάτι και δεν πιέζουμε για προσωπικές πληροφορίες.'
+          ],
+          correct: 2,
+          explanation: 'Η αναπηρία είναι μέρος της ταυτότητας ενός ανθρώπου, αλλά αυτό δεν σημαίνει ότι οφείλει να εξηγεί σε όλους τη διάγνωση του. Σεβόμαστε το δικαίωμα στην ιδιωτικότητα.'
+        },
+        {
+          question: 'Ποιο από τα παρακάτω είναι παράδειγμα θετικής δράσης ευαισθητοποίησης στο σχολείο;',
+          options: [
+            'Οργανώνουμε στην τάξη προβολή βίντεο ή μαρτυριών ατόμων με αναπηρία (με τη συγκατάθεσή τους) και συζήτηση για τα δικαιώματα και τα εμπόδια που συναντούν.',
+            'Κάνουμε διαγωνισμό «ποιος είναι ο πιο δυνατός» και γελάμε με όσους δεν τα καταφέρνουν.',
+            'Ζητάμε από μαθητή με αναπηρία να εξηγήσει υποχρεωτικά μπροστά σε όλους την προσωπική του ιστορία.'
+          ],
+          correct: 0,
+          explanation: 'Οι δράσεις ευαισθητοποίησης πρέπει να γίνονται με σεβασμό, χωρίς έκθεση ή πίεση σε κάποιο άτομο. Μπορούν να περιλαμβάνουν υλικό, καλεσμένους ομιλητές, παιχνίδια ρόλων ή εργασίες.'
+        },
+        {
+          question: 'Τι προστατεύει η Σύμβαση του ΟΗΕ για τα Δικαιώματα των Ατόμων με Αναπηρία;',
+          options: [
+            'Το «δικαίωμα» των ατόμων με αναπηρία να μένουν κλεισμένα στο σπίτι και να μη συμμετέχουν στην κοινωνία.',
+            'Το δικαίωμα σε ισότιμη πρόσβαση στην εκπαίδευση, στην εργασία, στην υγεία, στις μετακινήσεις και στη δημόσια ζωή.',
+            'Το να έχουν πάντα προτεραιότητα σε όλα, ανεξάρτητα από την κατάσταση των άλλων ανθρώπων.'
+          ],
+          correct: 1,
+          explanation: 'Η Σύμβαση ζητά από κάθε κράτος να εξασφαλίζει ίσες ευκαιρίες και να αφαιρεί τα εμπόδια που αποκλείουν τα άτομα με αναπηρία από την εκπαίδευση, την εργασία, την πληροφορία και τη συμμετοχή στις αποφάσεις.'
+        },
+        {
+          question: 'Ποιο από τα παρακάτω δείχνει ότι αναγνωρίζουμε και τις «αόρατες» αναπηρίες;',
+          options: [
+            'Λέμε ότι κάποιος δεν έχει αναπηρία επειδή δεν χρησιμοποιεί αμαξίδιο ή μπαστούνι.',
+            'Θυμόμαστε ότι υπάρχουν και αναπηρίες που δεν φαίνονται, όπως μαθησιακές δυσκολίες, χρόνια νοσήματα ή δυσκολίες ψυχικής υγείας.',
+            'Θεωρούμε υπερβολή όταν κάποιος ζητά προσαρμογές χωρίς να «φαίνεται» κάτι.'
+          ],
+          correct: 1,
+          explanation: 'Πολλές αναπηρίες δεν είναι ορατές. Αυτό δεν σημαίνει ότι δεν είναι πραγματικές ή δεν χρειάζονται υποστήριξη και λογικές προσαρμογές.'
+        },
+        {
+          question: 'Ποιο είναι παράδειγμα εμποδίου για άτομο με τύφλωση ή χαμηλή όραση στην πόλη;',
+          options: [
+            'Πινακίδες με καθαρά μεγάλα γράμματα και καλή αντίθεση.',
+            'Διαδρομές με οδηγούς όδευσης τυφλών και ηχητικά σήματα στους φωτεινούς σηματοδότες.',
+            'Σπασμένα πεζοδρόμια χωρίς ανάγλυφες λωρίδες και χωρίς ηχητική ενημέρωση στις διαβάσεις.'
+          ],
+          correct: 2,
+          explanation: 'Οι οδηγοί όδευσης τυφλών και τα ηχητικά σήματα βοηθούν την ασφαλή μετακίνηση. Όταν λείπουν ή είναι κατεστραμμένα, δημιουργούνται σοβαρά εμπόδια.'
+        },
+        {
+          question: 'Ποια ψηφιακή πρακτική βοηθά την προσβασιμότητα για όλους;',
+          options: [
+            'Ανεβάζουμε μόνο εικόνες με κείμενο χωρίς περιγραφή.',
+            'Χρησιμοποιούμε υπότιτλους σε βίντεο και περιγραφή εναλλακτικού κειμένου (alt text) στις εικόνες.',
+            'Χρησιμοποιούμε πολύ μικρά γράμματα και χαμηλή αντίθεση για «να είναι πιο όμορφο».'
+          ],
+          correct: 1,
+          explanation: 'Υπότιτλοι, ξεκάθαρες γραμματοσειρές και alt text βοηθούν άτομα με βαρηκοΐα, χαμηλή όραση ή όσους χρησιμοποιούν αναγνώστες οθόνης.'
+        },
+        {
+          question: 'Ένας/Μια μαθητής/τρια με μαθησιακή δυσκολία (π.χ. δυσλεξία) στην τάξη...',
+          options: [
+            'Χρειάζεται απλώς να «προσπαθήσει περισσότερο».',
+            'Μπορεί να βοηθηθεί με περισσότερο χρόνο, σημειώσεις σε απλή γλώσσα και πολυτροπικό υλικό (ήχος, εικόνα, κείμενο).',
+            'Δεν μπορεί να συνεχίσει το σχολείο κανονικά.'
+          ],
+          correct: 1,
+          explanation: 'Οι μαθησιακές δυσκολίες δεν σημαίνουν χαμηλή νοημοσύνη. Σημαίνουν ότι χρειάζονται κατάλληλες διδακτικές προσαρμογές για να δείξει ο μαθητής τις ικανότητές του.'
+        },
+        {
+          question: 'Τι σημαίνει συμπεριληπτική εκπαίδευση;',
+          options: [
+            'Όλα τα παιδιά με αναπηρία μένουν σε ξεχωριστά σχολεία μακριά από τα άλλα παιδιά.',
+            'Τα σχολεία προσαρμόζονται ώστε μαθητές με και χωρίς αναπηρία να μαθαίνουν μαζί, με την υποστήριξη που χρειάζεται ο καθένας.',
+            'Οι μαθητές με αναπηρία παρακολουθούν μόνο κάποια «εύκολα» μαθήματα.'
+          ],
+          correct: 1,
+          explanation: 'Η συμπερίληψη σημαίνει κοινό σχολείο για όλους με διαφορές στη διδασκαλία, στην αξιολόγηση και στην υποστήριξη, όχι αποκλεισμό.'
+        },
+        {
+          question: 'Ποιο από τα παρακάτω είναι στερεότυπο για τα άτομα με αναπηρία;',
+          options: [
+            'Πιστεύουμε ότι τα άτομα με αναπηρία είναι είτε «ήρωες» είτε «βάρος» για την κοινωνία.',
+            'Αναγνωρίζουμε ότι κάθε άτομο έχει διαφορετικές ικανότητες, ενδιαφέροντα και προσωπικότητα.',
+            'Ρωτάμε πώς μπορούμε να κάνουμε έναν χώρο πιο προσβάσιμο.'
+          ],
+          correct: 0,
+          explanation: 'Τα άτομα με αναπηρία δεν είναι ούτε υπεράνθρωποι ούτε καημένοι. Είναι άνθρωποι με διαφορετικές ανάγκες και δικαιώματα, όπως όλοι.'
+        },
+        {
+          question: 'Ποια φράση είναι πιο σεβαστική;',
+          options: [
+            '«Ο καημένος ο ανάπηρος συμμαθητής μας».',
+            '«Το παιδί με πρόβλημα».',
+            '«Ο συμμαθητής μας, άτομο με αναπηρία, που συμμετέχει κανονικά στην τάξη».'
+          ],
+          correct: 2,
+          explanation: 'Αποφεύγουμε λέξεις όπως «καημένος», «πρόβλημα». Βάζουμε πρώτα τον άνθρωπο και ύστερα, αν χρειάζεται, αναφέρουμε ότι έχει αναπηρία.'
+        },
+        {
+          question: 'Ένας/Μια συμμαθητής/τρια στο φάσμα του αυτισμού μπορεί να δυσκολεύεται...',
+          options: [
+            'Μόνο αν δεν διαβάζει αρκετά.',
+            'Από πολύ δυνατούς θορύβους, έντονα φώτα ή απρόβλεπτες αλλαγές στο πρόγραμμα.',
+            'Να μάθει οτιδήποτε στο σχολείο.'
+          ],
+          correct: 1,
+          explanation: 'Κάποιοι άνθρωποι στο φάσμα του αυτισμού είναι πιο ευαίσθητοι σε ήχους, φώτα ή αλλαγές. Μπορούμε να βοηθήσουμε με πιο ήρεμο περιβάλλον και σαφείς εξηγήσεις.'
+        },
+        {
+          question: 'Αν διαπιστώσουμε ότι ένας χώρος του σχολείου δεν είναι προσβάσιμος για συμμαθητή/τρια με αναπηρία...',
+          options: [
+            'Λέμε ότι «έτσι είναι το κτίριο, δεν αλλάζει».',
+            'Το γελάμε και λέμε ότι «δεν πειράζει, θα μείνει κάτω».',
+            'Συζητάμε με τους εκπαιδευτικούς και τη διεύθυνση και προτείνουμε λύσεις, όπως ράμπες, αλλαγή αίθουσας ή τεχνικές βελτιώσεις.'
+          ],
+          correct: 2,
+          explanation: 'Η προσβασιμότητα είναι ευθύνη της πολιτείας και του σχολείου, αλλά και οι μαθητές μπορούν να διεκδικούν αλλαγές και βελτιώσεις με σεβασμό.'
+        },
+        {
+          question: 'Ποιος είναι ένας απλός τρόπος να είμαστε σύμμαχοι των ατόμων με αναπηρία στην καθημερινή ζωή;',
+          options: [
+            'Μιλώντας πάντα εμείς αντί για εκείνους, για να «τους βοηθήσουμε».',
+            'Ακούγοντας τι χρειάζονται, σεβόμενοι τις επιλογές τους και στηρίζοντας πρωτοβουλίες για δικαιώματα και προσβασιμότητα.',
+            'Κάνοντας πως δεν τους βλέπουμε για να «μην τους φέρνουμε σε δύσκολη θέση».'
+          ],
+          correct: 1,
+          explanation: 'Σύμμαχος σημαίνει να ακούμε, να σεβόμαστε και να στεκόμαστε δίπλα όταν χρειάζεται, όχι να αποφασίζουμε στη θέση των άλλων ή να τους αγνοούμε.'
+        }
+      ];
+
+      const questionText = document.getElementById('questionText');
+      const optionsContainer = document.getElementById('optionsContainer');
+      const feedback = document.getElementById('feedback');
+      const nextButton = document.getElementById('nextButton');
+      const restartButton = document.getElementById('restartButton');
+      const questionCounter = document.getElementById('questionCounter');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const themeToggleBtn = document.getElementById('themeToggle');
+
+      const tabQuizBtn = document.getElementById('tabQuiz');
+      const tabWorksheetBtn = document.getElementById('tabWorksheet');
+      const tabInstructionsBtn = document.getElementById('tabInstructions');
+
+      const quizView = document.getElementById('quizView');
+      const worksheetView = document.getElementById('worksheetView');
+      const instructionsView = document.getElementById('instructionsView');
+      const printWorksheetBtn = document.getElementById('printWorksheetBtn');
+
+      let currentIndex = 0;
+      let score = 0;
+      let hasAnsweredCurrent = false;
+
+      function updateStatusBar() {
+        questionCounter.textContent = 'Ερώτηση ' + (currentIndex + 1) + ' από ' + quizData.length;
+        scoreDisplay.textContent = 'Σκορ: ' + score + '/' + quizData.length;
+      }
+
+      function renderQuestion() {
+        const q = quizData[currentIndex];
+        hasAnsweredCurrent = false;
+        feedback.textContent = '';
+        nextButton.disabled = true;
+        nextButton.textContent = currentIndex === quizData.length - 1
+          ? 'Δες το αποτέλεσμα ▶'
+          : 'Επόμενη ερώτηση ▶';
+
+        questionText.textContent = q.question;
+        optionsContainer.innerHTML = '';
+
+        q.options.forEach(function (opt, index) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'option-button';
+          btn.textContent = opt;
+          btn.dataset.index = index.toString();
+          btn.addEventListener('click', handleOptionClick);
+          optionsContainer.appendChild(btn);
+        });
+
+        restartButton.style.display = 'none';
+        nextButton.style.display = 'inline-flex';
+        updateStatusBar();
+      }
+
+      function handleOptionClick(event) {
+        if (hasAnsweredCurrent) return;
+        hasAnsweredCurrent = true;
+
+        const selectedButton = event.currentTarget;
+        const selectedIndex = Number(selectedButton.dataset.index);
+        theQuestion = quizData[currentIndex];
+        const q = theQuestion;
+        const isCorrect = selectedIndex === q.correct;
+
+        if (isCorrect) {
+          score++;
+        }
+
+        const optionButtons = optionsContainer.querySelectorAll('.option-button');
+        optionButtons.forEach(function (btn) {
+          const idx = Number(btn.dataset.index);
+          btn.disabled = true;
+          if (idx === q.correct) {
+            btn.classList.add('correct');
+          }
+          if (idx === selectedIndex && !isCorrect) {
+            btn.classList.add('incorrect');
+          }
+        });
+
+        const baseMessage = isCorrect
+          ? 'Μπράβο! Σωστή απάντηση.'
+          : 'Η σωστή απάντηση είναι: «' + q.options[q.correct] + '».';
+
+        feedback.textContent = baseMessage + ' ' + q.explanation;
+        nextButton.disabled = false;
+        updateStatusBar();
+      }
+
+      function showFinalResults() {
+        const total = quizData.length;
+        const percentage = Math.round((score / total) * 100);
+
+        questionText.textContent = 'Τελικό αποτέλεσμα';
+        optionsContainer.innerHTML = '';
+
+        let message = '';
+        if (percentage === 100) {
+          message = 'Εξαιρετική δουλειά! Έχεις πολύ καλή εικόνα για τα δικαιώματα και την καθημερινότητα των ατόμων με αναπηρία.';
+        } else if (percentage >= 70) {
+          message = 'Μπράβο! Ξέρεις ήδη πολλά. Συνέχισε να ενημερώνεσαι και να μιλάς με σεβασμό και ενσυναίσθηση.';
+        } else {
+          message = 'Καλή αρχή! Μπορείς να ξανακάνεις το quiz και να συζητήσεις στην τάξη για όσα έμαθες.';
+        }
+
+        feedback.innerHTML =
+          '<p>Απάντησες σωστά σε <strong>' + score +
+          '</strong> από τις <strong>' + total +
+          '</strong> ερωτήσεις (' + percentage + '%).</p>' +
+          '<p>' + message + '</p>' +
+          '<p>Θυμήσου: η αναπηρία δεν είναι πρόβλημα του ατόμου, αλλά εμπόδιο που δημιουργεί η κοινωνία όταν δεν είναι προσβάσιμη.</p>';
+
+        nextButton.style.display = 'none';
+        restartButton.style.display = 'inline-flex';
+      }
+
+      nextButton.addEventListener('click', function () {
+        if (currentIndex < quizData.length - 1) {
+          currentIndex++;
+          renderQuestion();
+        } else {
+          showFinalResults();
+        }
+      });
+
+      restartButton.addEventListener('click', function () {
+        currentIndex = 0;
+        score = 0;
+        renderQuestion();
+      });
+
+      themeToggleBtn.addEventListener('click', function () {
+        if (document.body.classList.contains('dark-theme')) {
+          document.body.classList.remove('dark-theme');
+          document.body.classList.add('light-theme');
+        } else {
+          document.body.classList.remove('light-theme');
+          document.body.classList.add('dark-theme');
+        }
+      });
+
+      function showTab(tabName) {
+        if (tabName === 'quiz') {
+          quizView.hidden = false;
+          worksheetView.hidden = true;
+          instructionsView.hidden = true;
+
+          tabQuizBtn.classList.add('active');
+          tabWorksheetBtn.classList.remove('active');
+          tabInstructionsBtn.classList.remove('active');
+        } else if (tabName === 'worksheet') {
+          quizView.hidden = true;
+          worksheetView.hidden = false;
+          instructionsView.hidden = true;
+
+          tabWorksheetBtn.classList.add('active');
+          tabQuizBtn.classList.remove('active');
+          tabInstructionsBtn.classList.remove('active');
+        } else {
+          quizView.hidden = true;
+          worksheetView.hidden = true;
+          instructionsView.hidden = false;
+
+          tabInstructionsBtn.classList.add('active');
+          tabQuizBtn.classList.remove('active');
+          tabWorksheetBtn.classList.remove('active');
+        }
+      }
+
+      tabQuizBtn.addEventListener('click', function () {
+        showTab('quiz');
+      });
+
+      tabWorksheetBtn.addEventListener('click', function () {
+        showTab('worksheet');
+      });
+
+      tabInstructionsBtn.addEventListener('click', function () {
+        showTab('instructions');
+      });
+
+      printWorksheetBtn.addEventListener('click', function () {
+        showTab('worksheet');
+        window.print();
+      });
+
+      // Εκκίνηση quiz
+      renderQuestion();
+      showTab('quiz');
+    });
+  </script>
+</body>
+</html>
